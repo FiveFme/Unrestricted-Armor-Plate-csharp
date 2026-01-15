@@ -24,7 +24,7 @@ public record ModMetadata : AbstractModMetadata
 	public override string Name { get; init; } = "unrestrictedArmorPlates";
 	public override string Author { get; init; } = "FiveF";
 	public override List<string>? Contributors { get; init; }
-	public override SemanticVersioning.Version Version { get; init; } = new("2.0.0");
+	public override SemanticVersioning.Version Version { get; init; } = new("2.0.1");
 	public override SemanticVersioning.Range SptVersion { get; init; } = new("4.0.x");
 	public override List<string>? Incompatibilities { get; init; }
 	public override Dictionary<string, SemanticVersioning.Range>? ModDependencies { get; init; }
@@ -33,7 +33,6 @@ public record ModMetadata : AbstractModMetadata
 	public override string License { get; init; } = "MIT";
 }
 
-// We want to load after PostDBModLoader is complete, so we set our type priority to that, plus 1.
 [Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 3)]
 public class unrestrictedArmorPlates(
 	DatabaseService databaseService,
