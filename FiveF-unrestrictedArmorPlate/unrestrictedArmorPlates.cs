@@ -57,15 +57,15 @@ public class unrestrictedArmorPlates(
 			{
 				builtInInsert();
 
-				//disableRandomisedArmorSlots - armor
+				//disable RandomisedArmorSlots - armor
 				if (modConfig.disableRandomisedArmorSlots)
 				{
 					foreach (var randomArmorSlot in _botConfig.Equipment["pmc"].Randomisation)
 					{
-						if (randomArmorSlot.RandomisedWeaponModSlots != null)
+						if (randomArmorSlot.RandomisedArmorSlots != null)
 						{
-							randomArmorSlot.RandomisedWeaponModSlots.Remove("TacticalVest");
-							randomArmorSlot.RandomisedWeaponModSlots.Remove("ArmorVest");
+							randomArmorSlot.RandomisedArmorSlots.Remove("TacticalVest");
+							randomArmorSlot.RandomisedArmorSlots.Remove("ArmorVest");
 						}
 					}
 				}
@@ -75,14 +75,14 @@ public class unrestrictedArmorPlates(
 			{
 				builtInInsert_helmet();
 
-				//disableRandomisedArmorSlots - helmet
+				//disable RandomisedArmorSlots - helmet
 				if (modConfig.disableRandomisedArmorSlots)
 				{
 					foreach (var randomArmorSlot in _botConfig.Equipment["pmc"].Randomisation)
 					{
-						if (randomArmorSlot.RandomisedWeaponModSlots != null)
+						if (randomArmorSlot.RandomisedArmorSlots != null)
 						{
-							randomArmorSlot.RandomisedWeaponModSlots.Remove("Headwear");
+							randomArmorSlot.RandomisedArmorSlots.Remove("Headwear");
 						}
 					}
 				}

@@ -2,7 +2,6 @@
 	"enableMod": true, // turns on/off the mod.
 
 	"enableBuiltInInsert": false, // enable to edit built-in insert for body armors.
-
 	"enableBuiltInInsert_helmet": false, // enable to edit built-in insert for helmet armors.
 
 	// disable randomisedArmorSlots for PMC's. 
