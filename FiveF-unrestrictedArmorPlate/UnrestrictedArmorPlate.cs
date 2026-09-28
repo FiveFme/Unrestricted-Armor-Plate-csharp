@@ -1,47 +1,56 @@
-using Microsoft.Extensions.Logging;
+using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Constants;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Extensions;
-using SPTarkov.Server.Core.Helpers;
-using SPTarkov.Server.Core.Models.Common;
-using SPTarkov.Server.Core.Models.Eft.Common.Tables;
+using SPTarkov.Server.Core.Helpers.Server;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Enums.Hideout;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Spt.Mod;
-using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Servers;
-using SPTarkov.Server.Core.Services;
-using System;
+using SPTarkov.Server.Core.Models.Spt.Tables;
 using System.Reflection;
 
-namespace FiveF_unrestrictedArmorPlates;
+namespace FiveF_UnrestrictedArmorPlates;
 
-public record ModMetadata : AbstractModMetadata
+/// <summary>
+/// This is the replacement for the former package.json data. This is required for all mods.
+///
+/// This is where we define all the metadata associated with this mod.
+/// You don't have to do anything with it, other than fill it out.
+/// All properties must be overriden, properties you don't use may be left null.
+/// It is read by the mod loader when this mod is loaded.
+/// </summary>
+public record ModMetadata : IModMetadata
 {
-	public override string ModGuid { get; init; } = "com.fivef.unrestrictedarmorplate";
-	public override string Name { get; init; } = "unrestrictedArmorPlates";
-	public override string Author { get; init; } = "FiveF";
-	public override List<string>? Contributors { get; init; }
-	public override SemanticVersioning.Version Version { get; init; } = new("2.0.2");
-	public override SemanticVersioning.Range SptVersion { get; init; } = new("4.0.x");
-	public override List<string>? Incompatibilities { get; init; }
-	public override Dictionary<string, SemanticVersioning.Range>? ModDependencies { get; init; }
-	public override string? Url { get; init; }
-	public override bool? IsBundleMod { get; init; }
-	public override string License { get; init; } = "MIT";
+	/// <summary>
+	/// Any string can be used for a modId, but it should ideally be unique and not easily duplicated
+	/// a 'bad' ID would be: "mymod", "mod1", "questmod"
+	/// It is recommended (but not mandatory) to use the reverse domain name notation,
+	/// see: https://docs.oracle.com/javase/tutorial/java/package/namingpkgs.html
+	/// </summary>
+	public string ModGuid { get; init; } = "com.fivef.unrestrictedarmorplate";
+	public string Name { get; init; } = "UnrestrictedArmorPlates";
+	public string Author { get; init; } = "FiveF";
+	public List<string>? Contributors { get; init; }
+	public SemanticVersioning.Version Version { get; init; } = new("2.1.0");
+	public SemanticVersioning.Range SptVersion { get; init; } = new("~4.1.0");
+	public List<string>? Incompatibilities { get; init; }
+	public Dictionary<string, SemanticVersioning.Range>? ModDependencies { get; init; }
+	public string? Url { get; init; }
+	public string License { get; init; } = "MIT";
+	public bool HasPrepatcher { get; init; } = false;
 }
 
-[Injectable(TypePriority = OnLoadOrder.PostDBModLoader + 3)]
-public class unrestrictedArmorPlates(
-	DatabaseService databaseService,
+// We want to load after PostDBModLoader is complete, so we set our type priority to that, plus 1.
+[Injectable(TypePriority = OnLoadOrder.PostLoad + 3)]
+public class UnrestrictedArmorPlates(
+	GlobalTable globalTable,
+	TemplateTable templateTable,
 	ModHelper modHelper,
-	ConfigServer configServer) : IOnLoad // Implement the `IOnLoad` interface so that this mod can do something
+	BotConfig botConfig) : IOnLoad // Implement the `IOnLoad` interface so that this mod can do something
 {
-	private readonly BotConfig _botConfig = configServer.GetConfig<BotConfig>();
 
-	public Task OnLoad()
+	public Task OnLoadAsync(CancellationToken cancellationToken)
 	{
 		// This will get us the full path to the mod, e.g. C:\spt\user\mods\5ReadCustomJsonConfig-0.0.1
 		var pathToMod = modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly());
@@ -49,18 +58,18 @@ public class unrestrictedArmorPlates(
 		// We give the path to the mod folder and the file we want to get, giving us the config, supply the files 'type' between the diamond brackets
 		var modConfig = modHelper.GetJsonDataFromFile<ModConfig>(pathToMod, "config/config.json5");
 
-		if (modConfig.enableMod)
+		if (modConfig.EnableMod)
 		{
-			armorPlates();
+			ArmorPlates();
 
-			if (modConfig.enableBuiltInInsert)
+			if (modConfig.EnableBuiltInInsert)
 			{
-				builtInInsert();
+				BuiltInInsert();
 
 				//disable RandomisedArmorSlots - armor
-				if (modConfig.disableRandomisedArmorSlots)
+				if (modConfig.DisableRandomisedArmorSlots)
 				{
-					foreach (var randomArmorSlot in _botConfig.Equipment["pmc"].Randomisation)
+					foreach (var randomArmorSlot in botConfig.Equipment["pmc"].Randomisation)
 					{
 						if (randomArmorSlot.RandomisedArmorSlots != null)
 						{
@@ -71,14 +80,14 @@ public class unrestrictedArmorPlates(
 				}
 			}
 
-			if (modConfig.enableBuiltInInsert_helmet)
+			if (modConfig.EnableBuiltInInsert_helmet)
 			{
-				builtInInsert_helmet();
+				BuiltInInsert_helmet();
 
 				//disable RandomisedArmorSlots - helmet
-				if (modConfig.disableRandomisedArmorSlots)
+				if (modConfig.DisableRandomisedArmorSlots)
 				{
-					foreach (var randomArmorSlot in _botConfig.Equipment["pmc"].Randomisation)
+					foreach (var randomArmorSlot in botConfig.Equipment["pmc"].Randomisation)
 					{
 						if (randomArmorSlot.RandomisedArmorSlots != null)
 						{
@@ -88,18 +97,18 @@ public class unrestrictedArmorPlates(
 				}
 			}
 
-			if (modConfig.filterPlatesByLevel_config)
+			if (modConfig.FilterPlatesByLevel_config)
 			{
-				_botConfig.Equipment["pmc"].FilterPlatesByLevel = false;
+				botConfig.Equipment["pmc"].FilterPlatesByLevel = false;
 			}
 		}
 
 		return Task.CompletedTask;
 	}
 
-	private void armorPlates()
+	private void ArmorPlates()
 	{
-		var itemsTable = databaseService.GetTables().Templates.Items;
+		var itemsTable = templateTable.Items;
 
 		var armorPlate_frontback = new List<string>();
 		var armorPlate_side = new List<string>();
@@ -253,9 +262,9 @@ public class unrestrictedArmorPlates(
 		*/
 	}
 
-	private void builtInInsert()
+	private void BuiltInInsert()
 	{
-		var itemsTable = databaseService.GetTables().Templates.Items;
+		var itemsTable = templateTable.Items;
 
 		var builtInInsert_frontback = new List<string>();
 		var builtInInsert_side = new List<string>();
@@ -527,9 +536,9 @@ public class unrestrictedArmorPlates(
 		}
 	}
 
-	private void builtInInsert_helmet()
+	private void BuiltInInsert_helmet()
 	{
-		var itemsTable = databaseService.GetTables().Templates.Items;
+		var itemsTable = templateTable.Items;
 
 		var builtInInsert_top = new List<string>();
 		var builtInInsert_back = new List<string>();
@@ -741,10 +750,10 @@ public class unrestrictedArmorPlates(
 
 	public record ModConfig
 	{
-		public required bool enableMod { get; set; }
-		public required bool enableBuiltInInsert { get; set; }
-		public required bool enableBuiltInInsert_helmet { get; set; }
-		public required bool disableRandomisedArmorSlots { get; set; }
-		public required bool filterPlatesByLevel_config { get; set; }
+		public required bool EnableMod { get; set; }
+		public required bool EnableBuiltInInsert { get; set; }
+		public required bool EnableBuiltInInsert_helmet { get; set; }
+		public required bool DisableRandomisedArmorSlots { get; set; }
+		public required bool FilterPlatesByLevel_config { get; set; }
 	}
 }
