@@ -1,17 +1,17 @@
 {
-	"enableMod": true, // turns on/off the mod.
+	"EnableMod": true, // turns on/off the mod.
 
-	"enableBuiltInInsert": false, // enable to edit built-in insert for body armors.
-	"enableBuiltInInsert_helmet": false, // enable to edit built-in insert for helmet armors.
+	"EnableBuiltInInsert": false, // enable to edit built-in insert for body armors.
+	"EnableBuiltInInsert_helmet": false, // enable to edit built-in insert for helmet armors.
 
 	// disable randomisedArmorSlots for PMC's. 
 	// PMC's will not spawn with fully randomized BuiltInInsert or ArmorPlates.
 	// Purrfect if you dont want pmc spawn with random BuiltInInsert.
-	"disableRandomisedArmorSlots": false,
+	"DisableRandomisedArmorSlots": false,
 
 	// if "false" - armor plates will not be assigned depending on the PMC level during generating PMCs/
 	// default: true
-	"filterPlatesByLevel_config": true
+	"FilterPlatesByLevel_config": true
 
 	/*
 	Depending on the level of the PMC, that PMC may have specific levels of armor. 
